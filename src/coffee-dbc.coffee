@@ -1,4 +1,7 @@
-exports.ContractException = ContractException = (@message) -> @name = 'ContractException'
+exports.ContractException = class ContractException
+  constructor: (@name, @partName) ->
+    @message = "Contract '#{@name}.#{@partName}' was broken"
+    @name = 'ContractException'
 
 ContractException:: = new Error
 
@@ -21,7 +24,7 @@ class Contract
     for partName of @contractParts
       contractFn = @contractParts[partName]
       passed = contractFn.apply ctx
-      throw new ContractException "Contract '#{@name}.#{partName}' failed" unless passed
+      throw new ContractException @name, partName unless passed
 
 
 exports.class = (dbcClassTemplate) ->
@@ -49,6 +52,7 @@ exports.class = (dbcClassTemplate) ->
     commandFn = commands[commandName]().do
     Cls::[commandName] = ->
       commandFn.apply @_innerInstance, arguments
+      invariant.checkFor @_innerInstance
       undefined
 
   Cls

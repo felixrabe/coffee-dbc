@@ -63,10 +63,11 @@ describe 'Design By Contract', ->
 
     it 'should be checked after construction', ->
       Cls = dbc.class ->
+        constructor: (@name) ->
         invariant:
-          notTrue: -> false
-      (-> new Cls).should.throw "Contract 'invariant.notTrue' failed"
-      (-> new Cls).should.not.throw "Contract 'notTrue' failed"
+          nameIsAString: -> typeof @new.name == 'string'
+      (-> new Cls 5).should.throw dbc.ContractException, "Contract 'invariant.nameIsAString' was broken"
+      (-> new Cls 5).should.not.throw "Contract 'nameIsAString' was broken"
 
     it 'should provide access to instance variables', ->
       Cls = dbc.class ->
@@ -83,6 +84,21 @@ describe 'Design By Contract', ->
           xIsSmallerThan12: -> @new.x < 12
       (-> new Cls 5).should.not.throw dbc.ContractException
       (-> new Cls 15).should.throw dbc.ContractException
+
+    it 'should be checked after every command call', ->
+      Cls = dbc.class ->
+        constructor: (@name) ->
+        invariant:
+          nameIsAString: -> typeof @new.name == 'string'
+        commands:
+          setName: (name) ->
+            do: (name) -> @name = name
+      obj = null
+      (-> new Cls).should.throw dbc.ContractException
+      (-> new Cls 5).should.throw dbc.ContractException
+      (-> obj = new Cls 'Heinz').should.not.throw dbc.ContractException
+      (-> obj.setName 5).should.throw dbc.ContractException, /nameIsAString/
+
 
   describe '#getFnArgNames', ->
 
