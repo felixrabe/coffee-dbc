@@ -7,11 +7,10 @@ describe 'Design By Contract', ->
     Cls = dbc.class ->
     new Cls
 
-  it 'should allow for a constructor' #, ->
-    # Cls = dbc.class ->
-    #   constructor: (@x) ->
-    # obj = new Cls(24)
-    # obj.x.should.equal 24
+  it 'should allow for a constructor', ->
+    Cls = dbc.class ->
+      constructor: (@x) ->
+    obj = new Cls(24)
 
   it 'should only allow access to instance variables via queries', ->
     Cls = dbc.class ->
