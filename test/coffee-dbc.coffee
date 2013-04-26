@@ -66,6 +66,7 @@ describe 'Design By Contract', ->
         invariant:
           notTrue: -> false
       (-> new Cls).should.throw "Contract 'invariant.notTrue' failed"
+      (-> new Cls).should.not.throw "Contract 'notTrue' failed"
 
     it 'should provide access to instance variables', ->
       Cls = dbc.class ->
