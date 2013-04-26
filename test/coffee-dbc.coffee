@@ -25,5 +25,13 @@ describe 'Design By Contract', ->
         constructor: (@x) ->
         invariant:
           hasX: -> @new.x?
-      (-> new Cls 123).should.not.throw Error
-      (-> new Cls).should.throw Error
+      (-> new Cls 123).should.not.throw dbc.ContractException
+      (-> new Cls).should.throw dbc.ContractException
+
+    it 'should check for correct values', ->
+      Cls = dbc.class ->
+        constructor: (@x) ->
+        invariant:
+          xIsSmallerThan12: -> @new.x < 12
+      (-> new Cls 5).should.not.throw dbc.ContractException
+      (-> new Cls 15).should.throw dbc.ContractException
