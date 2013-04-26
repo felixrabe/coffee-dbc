@@ -12,7 +12,7 @@ describe 'Design By Contract', ->
       constructor: (@x) ->
     obj = new Cls(24)
 
-  it 'should only allow access to instance variables via queries', ->
+  it 'should not allow direct access to instance variables', ->
     Cls = dbc.class ->
       constructor: (@x) ->
     obj = new Cls(24)
@@ -24,6 +24,12 @@ describe 'Design By Contract', ->
         x: -> 24
     obj = new Cls
     obj.x().should.equal 24
+
+  it 'should let queries have access instance variables', ->
+    Cls = dbc.class ->
+      constructor: (@x) ->
+      queries: x: -> @x * 2
+    new Cls(5).x().should.equal 10
 
   describe 'Class Invariant', ->
 
