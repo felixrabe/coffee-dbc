@@ -46,7 +46,12 @@ describe 'Design By Contract', ->
     obj.addToX(15)
     obj.x().should.equal 48
 
-  it 'should force command return values to be undefined'
+  it 'should force command return values to be undefined', ->
+    Cls = dbc.class ->
+      commands:
+        justChangeSomething: ->
+          do: -> return 'a value'
+    should.not.exist new Cls().justChangeSomething()
 
   it 'should let commands have access to instance variables'
 
