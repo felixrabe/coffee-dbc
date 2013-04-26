@@ -2,7 +2,7 @@ class Contract
   constructor: (@name, @contractParts) ->
   checkFor: (instance) ->
     for partName of @contractParts
-      contract = @contractParts[partName]()
+      contract = @contractParts[partName]
       passed = contract()
       throw { name: 'ContractException', message: "Contract '#{@name}.#{partName}' failed" } unless passed
 

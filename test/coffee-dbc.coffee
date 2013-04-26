@@ -17,10 +17,10 @@ describe 'Design By Contract', ->
     it 'should be checked after construction', ->
       Cls = dbc.class ->
         invariant:
-          something: -> false
-      (-> new Cls).should.throw Error
+          notTrue: -> false
+      (-> new Cls).should.throw "Contract 'invariant.notTrue' failed"
 
     it 'should provide access to instance variables' #, ->
       # Cls = dbc.class ->
       #   invariant:
-      #     hasX: -> @new.x?
+      #     hasX: -> @current.x?
