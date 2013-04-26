@@ -1,7 +1,9 @@
 should = require('chai').should()
 dbc = require '../src/coffee-dbc'
 
+
 describe 'Design By Contract', ->
+
 
   describe '#class', ->
 
@@ -20,6 +22,7 @@ describe 'Design By Contract', ->
       obj = new Cls(24)
       should.not.exist obj.x
 
+
   describe 'Queries', ->
 
     it 'should be possible', ->
@@ -34,6 +37,7 @@ describe 'Design By Contract', ->
         constructor: (@x) ->
         queries: x: -> @x * 2
       new Cls(5).x().should.equal 10
+
 
   describe 'Commands', ->
 
@@ -58,6 +62,7 @@ describe 'Design By Contract', ->
           justChangeSomething: ->
             do: -> return 'a value'
       should.not.exist new Cls().justChangeSomething()
+
 
   describe 'Class Invariant', ->
 
