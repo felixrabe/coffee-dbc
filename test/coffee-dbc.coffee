@@ -78,7 +78,18 @@ describe 'Design By Contract', ->
       obj.name().should.not.equal '12345678901'
       obj.name().should.equal '1234567890'
 
-    it 'should allow for postconditions ("ensure")'
+    it 'should allow for postconditions ("ensure")', ->
+      Cls = dbc.class ->
+        constructor: (@internal) ->
+        queries: name: -> @internal
+        commands:
+          setName: (name) ->
+            do: (name) -> @internal_ = name
+            ensure:
+              actuallySetsName: -> @new.internal == @name
+      obj = new Cls 'Felix'
+      (-> obj.setName 'Peter').should.throw dbc.ContractException, \
+        "Contract 'setName.ensure.actuallySetsName' was broken"
 
 
   describe 'Class Invariant', ->

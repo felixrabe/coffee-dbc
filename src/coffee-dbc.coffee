@@ -49,11 +49,14 @@ exports.class = (dbcClassTemplate) ->
     command = commandFn()
     commandRequireContract = new Contract "#{commandName}.require", command?.require
     commandDo = command?.do
+    commandEnsureContract = new Contract "#{commandName}.ensure", command?.ensure
     Cls::[commandName] = ->
       args = {}
       args[fnArgNames[i]] = arguments[i] for i in [0...arguments.length]
       commandRequireContract.checkFor args
       commandDo.apply @_innerInstance, arguments
+      args.new = @_innerInstance
+      commandEnsureContract.checkFor args
       invariantContract.checkFor new: @_innerInstance
       undefined
 
