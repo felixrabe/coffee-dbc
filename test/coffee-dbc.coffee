@@ -5,4 +5,4 @@ describe 'Design By Contract', ->
 
   it 'should return a class', ->
     Cls = dbc.class ->
-    # new Cls
+    new Cls
