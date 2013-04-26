@@ -47,8 +47,7 @@ describe 'Design By Contract', ->
         queries: x: -> @internal
         commands:
           addToX: (x) ->
-            do: (x) ->
-              @internal += x
+            do: (x) -> @internal += x
       obj = new Cls
       obj.x().should.equal 0
       obj.addToX(33)
@@ -63,6 +62,24 @@ describe 'Design By Contract', ->
             do: -> return 'a value'
       should.not.exist new Cls().justChangeSomething()
 
+    it 'should allow for preconditions ("require")', ->
+      Cls = dbc.class ->
+        constructor: (@internal) ->
+        queries: name: -> @internal
+        commands:
+          setName: (name) ->
+            require:
+              nameIsNotLongerThan10Characters: -> @name.length <= 10
+            do: (name) -> @internal = name
+      obj = new Cls 'Felix'
+      (-> obj.setName '1234567890').should.not.throw dbc.ContractException
+      (-> obj.setName '12345678901').should.throw dbc.ContractException, \
+        "Contract 'setName.require.nameIsNotLongerThan10Characters' was broken"
+      obj.name().should.not.equal '12345678901'
+      obj.name().should.equal '1234567890'
+
+    it 'should allow for postconditions ("ensure")'
+
 
   describe 'Class Invariant', ->
 
@@ -71,8 +88,10 @@ describe 'Design By Contract', ->
         constructor: (@name) ->
         invariant:
           nameIsAString: -> typeof @new.name == 'string'
-      (-> new Cls 5).should.throw dbc.ContractException, "Contract 'invariant.nameIsAString' was broken"
-      (-> new Cls 5).should.not.throw "Contract 'nameIsAString' was broken"
+      (-> new Cls 5).should.throw dbc.ContractException, \
+        "Contract 'invariant.nameIsAString' was broken"
+      (-> new Cls 5).should.not.throw \
+        "Contract 'nameIsAString' was broken"
 
     it 'should provide access to instance variables', ->
       Cls = dbc.class ->

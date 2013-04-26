@@ -8,29 +8,24 @@ ContractException:: = new Error
 
 # Google: javascript get names of function arguments
 # => http://stackoverflow.com/a/9924463
-exports.getFnArgNames = (fn) ->
+exports.getFnArgNames = getFnArgNames = (fn) ->
   s = fn.toString()
   s.slice(s.indexOf('(') + 1, s.indexOf(')')).match(/([^\s,]+)/g)
 
 
-class ContractContext
-  constructor: (@new) ->
-
-
 class Contract
   constructor: (@name, @contractParts) ->
-  checkFor: (instance) ->
-    ctx = new ContractContext instance
+  checkFor: (contractContext) ->
     for partName of @contractParts
       contractFn = @contractParts[partName]
-      passed = contractFn.apply ctx
+      passed = contractFn.apply contractContext
       throw new ContractException @name, partName unless passed
 
 
 exports.class = (dbcClassTemplate) ->
   template = dbcClassTemplate()
   constructor = template?.constructor
-  invariant = new Contract 'invariant', template?.invariant
+  invariantContract = new Contract 'invariant', template?.invariant
   queries = template?.queries ? {}
   commands = template?.commands ? {}
 
@@ -42,17 +37,24 @@ exports.class = (dbcClassTemplate) ->
   Cls = class
     constructor: (arg...) ->
       @_innerInstance = new _InnerClass(arg...)
-      invariant.checkFor @_innerInstance
+      invariantContract.checkFor new: @_innerInstance
 
   for queryName of queries
     queryFn = queries[queryName]
     Cls::[queryName] = -> queryFn.apply @_innerInstance
 
   for commandName of commands
-    commandFn = commands[commandName]().do
+    commandFn = commands[commandName]
+    fnArgNames = getFnArgNames commandFn
+    command = commandFn()
+    commandRequireContract = new Contract "#{commandName}.require", command?.require
+    commandDo = command?.do
     Cls::[commandName] = ->
-      commandFn.apply @_innerInstance, arguments
-      invariant.checkFor @_innerInstance
+      args = {}
+      args[fnArgNames[i]] = arguments[i] for i in [0...arguments.length]
+      commandRequireContract.checkFor args
+      commandDo.apply @_innerInstance, arguments
+      invariantContract.checkFor new: @_innerInstance
       undefined
 
   Cls
