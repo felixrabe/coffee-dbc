@@ -25,9 +25,12 @@ exports.class = (dbcClassTemplate) ->
   constructor = template?.constructor
   invariant = new Contract 'invariant', template?.invariant
 
-  class
+  class _InnerClass
     # https://github.com/jashkenas/coffee-script/issues/2961
     constructor: ->
       constructor?.apply @, arguments
-      invariant.checkFor @
 
+  class
+    constructor: (arg...) ->
+      @_inner = new _InnerClass(arg...)
+      invariant.checkFor @_inner
