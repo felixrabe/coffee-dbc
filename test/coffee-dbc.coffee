@@ -72,7 +72,7 @@ describe 'Design By Contract', ->
               nameIsNotLongerThan10Characters: -> @name.length <= 10
             do: (name) -> @internal = name
       obj = new Cls 'Felix'
-      (-> obj.setName '1234567890').should.not.throw dbc.ContractException
+      (-> obj.setName '1234567890').should.not.throw Error
       (-> obj.setName '12345678901').should.throw dbc.ContractException, \
         "Contract 'setName.require.nameIsNotLongerThan10Characters' was broken"
       obj.name().should.not.equal '12345678901'
@@ -91,14 +91,19 @@ describe 'Design By Contract', ->
       (-> obj.setName 'Peter').should.throw dbc.ContractException, \
         "Contract 'setName.ensure.actuallySetsName' was broken"
 
-    it 'should provide the previous state in postconditions' #, ->
-      # Cls = dbc.class ->
-      #   constructor: (@x) ->
-      #   commands:
-      #     incrementByOne:
-      #       do: -> @x += 1
-      #       ensure:
-      #         incrementsXByOne: ->
+    it 'should provide the previous state in postconditions', ->
+      Cls = dbc.class ->
+        constructor: (@_x) ->
+        queries: x: -> @_x
+        commands:
+          incrementByOne: ->
+            do: -> @_x += 1
+            ensure:
+              incrementsXByOne: ->
+                # typeof @old.x != 'undefined'
+                @new.x() == @old.x() + 1
+      obj = new Cls(0)
+      (-> obj.incrementByOne()).should.not.throw Error
 
 
   describe 'Class Invariant', ->
@@ -120,7 +125,8 @@ describe 'Design By Contract', ->
         queries: x: -> @internal
         invariant:
           xIsSmallerThan12: -> @new.x() < 12
-      (-> new Cls 5).should.not.throw dbc.ContractException
+      (-> new Cls 5).should.not.throw Error
+      (-> new Cls 15).should.throw Error
       (-> new Cls 15).should.throw dbc.ContractException
 
     it 'should be checked after every command call', ->

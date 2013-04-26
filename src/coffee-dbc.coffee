@@ -1,28 +1,46 @@
-exports.ContractException = class ContractException
-  constructor: (@name, @partName) ->
-    @message = "Contract '#{@name}.#{@partName}' was broken"
+dbc = exports
+
+dbc.ContractException = class ContractException
+  constructor: (@contractName, @partName) ->
+    @message = "Contract '#{@contractName}.#{@partName}' was broken"
     @name = 'ContractException'
 
-ContractException:: = new Error
+# Google: custom exception javascript
+# => http://stackoverflow.com/q/783818
+# and http://stackoverflow.com/a/4728903
+_usePrototype = true
+dbc.ContractException:: = new Error() unless _usePrototype  # breaks error reporting in Mocha
+dbc.ContractException:: = (Error::) if _usePrototype  # breaks error reporting in Mocha
 
 
 # Google: javascript get names of function arguments
 # => http://stackoverflow.com/a/9924463
-exports.getFnArgNames = getFnArgNames = (fn) ->
+dbc.getFnArgNames = (fn) ->
   s = fn.toString()
   s.slice(s.indexOf('(') + 1, s.indexOf(')')).match(/([^\s,]+)/g)
+
+
+# Google: javascript clone object
+# => http://stackoverflow.com/a/5344074
+# => http://jsperf.com/cloning-an-object/2
+dbc.clone = (obj) ->
+  target = Object.create obj
+  for own key, value of obj
+    if key == '_innerInstance'
+      value = dbc.clone value
+    target[key] = value
+  target
 
 
 class Contract
   constructor: (@name, @contractParts) ->
   checkFor: (contractContext) ->
-    for partName of @contractParts
-      contractFn = @contractParts[partName]
+    for own partName, contractFn of @contractParts
       passed = contractFn.apply contractContext
       throw new ContractException @name, partName unless passed
 
 
-exports.class = (dbcClassTemplate) ->
+dbc.class = (dbcClassTemplate) ->
   template = dbcClassTemplate()
   constructor = template?.constructor
   invariantContract = new Contract 'invariant', template?.invariant
@@ -39,13 +57,11 @@ exports.class = (dbcClassTemplate) ->
       @_innerInstance = new _InnerClass(arg...)
       invariantContract.checkFor new: @
 
-  for queryName of queries
-    queryFn = queries[queryName]
+  for own queryName, queryFn of queries
     Cls::[queryName] = -> queryFn.apply @_innerInstance
 
-  for commandName of commands
-    commandFn = commands[commandName]
-    fnArgNames = getFnArgNames commandFn
+  for own commandName, commandFn of commands
+    fnArgNames = dbc.getFnArgNames commandFn
     command = commandFn()
     commandRequireContract = new Contract "#{commandName}.require", command?.require
     commandDo = command?.do
@@ -54,9 +70,10 @@ exports.class = (dbcClassTemplate) ->
       args = {}
       args[fnArgNames[i]] = arguments[i] for i in [0...arguments.length]
       commandRequireContract.checkFor args
+      args.old = dbc.clone @
       commandDo.apply @_innerInstance, arguments
       args.new = @
-      commandEnsureContract.checkFor args
+      commandEnsureContract.checkFor args, true
       invariantContract.checkFor new: @
       undefined
 
