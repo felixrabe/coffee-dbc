@@ -47,6 +47,8 @@ exports.class = (dbcClassTemplate) ->
 
   for commandName of commands
     commandFn = commands[commandName]().do
-    Cls::[commandName] = -> commandFn.apply @_innerInstance, arguments; undefined
+    Cls::[commandName] = ->
+      commandFn.apply @_innerInstance, arguments
+      undefined
 
   Cls
