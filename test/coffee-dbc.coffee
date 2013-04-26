@@ -86,48 +86,52 @@ describe 'Design By Contract', ->
           setName: (name) ->
             do: (name) -> @internal_ = name
             ensure:
-              actuallySetsName: -> @new.internal == @name
+              actuallySetsName: -> @new.name() == @name
       obj = new Cls 'Felix'
       (-> obj.setName 'Peter').should.throw dbc.ContractException, \
         "Contract 'setName.ensure.actuallySetsName' was broken"
+
+    it 'should provide the previous state in postconditions' #, ->
+      # Cls = dbc.class ->
+      #   constructor: (@x) ->
+      #   commands:
+      #     incrementByOne:
+      #       do: -> @x += 1
+      #       ensure:
+      #         incrementsXByOne: ->
 
 
   describe 'Class Invariant', ->
 
     it 'should be checked after construction', ->
       Cls = dbc.class ->
-        constructor: (@name) ->
+        constructor: (@internal) ->
+        queries: name: -> @internal
         invariant:
-          nameIsAString: -> typeof @new.name == 'string'
+          nameIsAString: -> typeof @new.name() == 'string'
       (-> new Cls 5).should.throw dbc.ContractException, \
         "Contract 'invariant.nameIsAString' was broken"
       (-> new Cls 5).should.not.throw \
         "Contract 'nameIsAString' was broken"
 
-    it 'should provide access to instance variables', ->
-      Cls = dbc.class ->
-        constructor: (@x) ->
-        invariant:
-          hasX: -> @new.x?
-      (-> new Cls 123).should.not.throw dbc.ContractException
-      (-> new Cls).should.throw dbc.ContractException
-
     it 'should check for correct values', ->
       Cls = dbc.class ->
-        constructor: (@x) ->
+        constructor: (@internal) ->
+        queries: x: -> @internal
         invariant:
-          xIsSmallerThan12: -> @new.x < 12
+          xIsSmallerThan12: -> @new.x() < 12
       (-> new Cls 5).should.not.throw dbc.ContractException
       (-> new Cls 15).should.throw dbc.ContractException
 
     it 'should be checked after every command call', ->
       Cls = dbc.class ->
-        constructor: (@name) ->
+        constructor: (@internal) ->
+        queries: name: -> @internal
         invariant:
-          nameIsAString: -> typeof @new.name == 'string'
+          nameIsAString: -> typeof @new.name() == 'string'
         commands:
           setName: (name) ->
-            do: (name) -> @name = name
+            do: (name) -> @internal = name
       obj = null
       (-> new Cls).should.throw dbc.ContractException
       (-> new Cls 5).should.throw dbc.ContractException

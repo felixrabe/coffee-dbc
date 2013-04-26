@@ -37,7 +37,7 @@ exports.class = (dbcClassTemplate) ->
   Cls = class
     constructor: (arg...) ->
       @_innerInstance = new _InnerClass(arg...)
-      invariantContract.checkFor new: @_innerInstance
+      invariantContract.checkFor new: @
 
   for queryName of queries
     queryFn = queries[queryName]
@@ -55,9 +55,9 @@ exports.class = (dbcClassTemplate) ->
       args[fnArgNames[i]] = arguments[i] for i in [0...arguments.length]
       commandRequireContract.checkFor args
       commandDo.apply @_innerInstance, arguments
-      args.new = @_innerInstance
+      args.new = @
       commandEnsureContract.checkFor args
-      invariantContract.checkFor new: @_innerInstance
+      invariantContract.checkFor new: @
       undefined
 
   Cls
