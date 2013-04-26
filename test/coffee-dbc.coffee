@@ -31,7 +31,7 @@ describe 'Design By Contract', ->
       queries: x: -> @x * 2
     new Cls(5).x().should.equal 10
 
-  it 'should allow for commands', ->
+  it 'should allow for commands with access to instance variables', ->
     Cls = dbc.class ->
       constructor: -> @internal = 0
       queries: x: -> @internal
@@ -52,8 +52,6 @@ describe 'Design By Contract', ->
         justChangeSomething: ->
           do: -> return 'a value'
     should.not.exist new Cls().justChangeSomething()
-
-  it 'should let commands have access to instance variables'
 
   describe 'Class Invariant', ->
 
