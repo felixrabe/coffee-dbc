@@ -38,6 +38,13 @@ describe 'Design By Contract', ->
         queries: x: -> @x * 2
       new Cls(5).x().should.equal 10
 
+    it 'should not mutate object state', ->
+      Cls = dbc.class ->
+        constructor: (@x = 0) ->
+        queries: x: -> @x++
+      (-> new Cls(2).x()).should.throw dbc.ContractException, \
+        "Object state was mutated by query 'x'"
+
 
   describe 'Commands', ->
 

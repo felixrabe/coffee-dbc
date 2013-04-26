@@ -8,9 +8,15 @@ dbc.ContractException = class ContractException
 # Google: custom exception javascript
 # => http://stackoverflow.com/q/783818
 # and http://stackoverflow.com/a/4728903
-_usePrototype = true
-dbc.ContractException:: = new Error() unless _usePrototype  # breaks error reporting in Mocha
-dbc.ContractException:: = (Error::) if _usePrototype  # breaks error reporting in Mocha
+dbc.ContractException:: = Error::
+
+
+dbc.QueryMutationException = class QueryMutationException
+  constructor: (@queryName) ->
+    @message = "Object state was mutated by query '#{@queryName}'"
+    @name = 'QueryMutationException'
+
+dbc.QueryMutationException:: = Error::
 
 
 # Google: javascript get names of function arguments
@@ -58,7 +64,13 @@ dbc.class = (dbcClassTemplate) ->
       invariantContract.checkFor new: @
 
   for own queryName, queryFn of queries
-    Cls::[queryName] = -> queryFn.apply @_innerInstance
+    Cls::[queryName] = ->
+      old_innerInstance = dbc.clone @_innerInstance
+      result = queryFn.apply @_innerInstance
+      for own key, value of old_innerInstance
+        if value != @_innerInstance[key]
+          throw new QueryMutationException queryName
+      result
 
   for own commandName, commandFn of commands
     fnArgNames = dbc.getFnArgNames commandFn
