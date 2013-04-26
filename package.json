@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "chai": "*",
+    "coffee-script": "*",
+    "mocha": "*"
+  },
+  "scripts": {
+    "test": "cake test"
+  }
+}
