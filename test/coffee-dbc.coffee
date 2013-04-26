@@ -18,6 +18,13 @@ describe 'Design By Contract', ->
     obj = new Cls(24)
     should.not.exist obj.x
 
+  it 'should allow for queries', ->
+    Cls = dbc.class ->
+      queries:
+        x: -> 24
+    obj = new Cls
+    obj.x().should.equal 24
+
   describe 'Class Invariant', ->
 
     it 'should be checked after construction', ->

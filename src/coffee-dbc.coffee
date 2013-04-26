@@ -1,5 +1,7 @@
 exports.ContractException = ContractException = (@message) -> @name = 'ContractException'
+
 ContractException:: = new Error
+
 
 # Google: javascript get names of function arguments
 # => http://stackoverflow.com/a/9924463
@@ -11,26 +13,35 @@ exports.getFnArgNames = (fn) ->
 class ContractContext
   constructor: (@new) ->
 
+
 class Contract
   constructor: (@name, @contractParts) ->
   checkFor: (instance) ->
     ctx = new ContractContext instance
     for partName of @contractParts
-      contract = @contractParts[partName]
-      passed = contract.apply ctx
+      contractFn = @contractParts[partName]
+      passed = contractFn.apply ctx
       throw new ContractException "Contract '#{@name}.#{partName}' failed" unless passed
+
 
 exports.class = (dbcClassTemplate) ->
   template = dbcClassTemplate()
   constructor = template?.constructor
   invariant = new Contract 'invariant', template?.invariant
+  queries = template?.queries ? {}
 
   class _InnerClass
     # https://github.com/jashkenas/coffee-script/issues/2961
     constructor: ->
       constructor?.apply @, arguments
 
-  class
+  Cls = class
     constructor: (arg...) ->
-      @_inner = new _InnerClass(arg...)
-      invariant.checkFor @_inner
+      @_innerInstance = new _InnerClass(arg...)
+      invariant.checkFor @_innerInstance
+
+  for queryName of queries
+    queryFn = queries[queryName]
+    Cls::[queryName] = -> queryFn.apply @_innerInstance
+
+  Cls
