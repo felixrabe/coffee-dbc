@@ -1,8 +1,15 @@
-class ContractContext
-  constructor: (@new) ->
-
 exports.ContractException = ContractException = (@message) -> @name = 'ContractException'
 ContractException:: = new Error
+
+# Google: javascript get names of function arguments
+# => http://stackoverflow.com/a/9924463
+exports.getFnArgNames = (fn) ->
+  s = fn.toString()
+  s.slice(s.indexOf('(') + 1, s.indexOf(')')).match(/([^\s,]+)/g)
+
+
+class ContractContext
+  constructor: (@new) ->
 
 class Contract
   constructor: (@name, @contractParts) ->

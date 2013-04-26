@@ -1,4 +1,4 @@
-require('chai').should()
+should = require('chai').should()
 dbc = require '../src/coffee-dbc'
 
 describe 'Design By Contract', ->
@@ -14,6 +14,7 @@ describe 'Design By Contract', ->
     obj.x.should.equal 24
 
   describe 'Class Invariant', ->
+
     it 'should be checked after construction', ->
       Cls = dbc.class ->
         invariant:
@@ -35,3 +36,11 @@ describe 'Design By Contract', ->
           xIsSmallerThan12: -> @new.x < 12
       (-> new Cls 5).should.not.throw dbc.ContractException
       (-> new Cls 15).should.throw dbc.ContractException
+
+  describe 'getFnArgNames', ->
+
+    it 'should get the list of argument names', ->
+      should.not.exist dbc.getFnArgNames ->
+      (dbc.getFnArgNames (alabama) ->).should.deep.equal ['alabama']
+      (dbc.getFnArgNames (a, b, c = 5) ->).should.deep.equal ['a', 'b', 'c']
+      should.not.exist dbc.getFnArgNames (a, b, c...) ->  # CoffeeScript uses arguments here
