@@ -14,11 +14,11 @@ describe 'Design By Contract', ->
     obj.x.should.equal 24
 
   describe 'Class Invariant', ->
-    it 'should be checked after construction' #, ->
-      # Cls = dbc.class ->
-      #   invariant:
-      #     something: -> false
-      # (-> new Cls).should.throw Error
+    it 'should be checked after construction', ->
+      Cls = dbc.class ->
+        invariant:
+          something: -> false
+      (-> new Cls).should.throw Error
 
     it 'should provide access to instance variables' #, ->
       # Cls = dbc.class ->
