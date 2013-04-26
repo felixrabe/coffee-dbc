@@ -3,6 +3,6 @@ exports.class = (dbcClassTemplate) ->
   constructor = dbcClassTemplate?.constructor
 
   class
-    # constructor: dbcClassTemplate()?.constructor  # CoffeeScript compiles to JS code that tries to call undefined
+    # https://github.com/jashkenas/coffee-script/issues/2961
     constructor: -> constructor?.apply @, arguments
 
