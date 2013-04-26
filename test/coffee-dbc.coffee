@@ -25,7 +25,7 @@ describe 'Design By Contract', ->
     obj = new Cls
     obj.x().should.equal 24
 
-  it 'should let queries have access instance variables', ->
+  it 'should let queries have access to instance variables', ->
     Cls = dbc.class ->
       constructor: (@x) ->
       queries: x: -> @x * 2
