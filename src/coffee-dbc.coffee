@@ -1,2 +1,1 @@
-exports = dbc =
-  class: ->
+exports.class = (dbcClassTemplate) ->
