@@ -31,6 +31,25 @@ describe 'Design By Contract', ->
       queries: x: -> @x * 2
     new Cls(5).x().should.equal 10
 
+  it 'should allow for commands', ->
+    Cls = dbc.class ->
+      constructor: -> @internal = 0
+      queries: x: -> @internal
+      commands:
+        addToX: (x) ->
+          do: (x) ->
+            @internal += x
+    obj = new Cls
+    obj.x().should.equal 0
+    obj.addToX(33)
+    obj.x().should.equal 33
+    obj.addToX(15)
+    obj.x().should.equal 48
+
+  it 'should force command return values to be undefined'
+
+  it 'should let commands have access to instance variables'
+
   describe 'Class Invariant', ->
 
     it 'should be checked after construction', ->

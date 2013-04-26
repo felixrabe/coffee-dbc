@@ -29,6 +29,7 @@ exports.class = (dbcClassTemplate) ->
   constructor = template?.constructor
   invariant = new Contract 'invariant', template?.invariant
   queries = template?.queries ? {}
+  commands = template?.commands ? {}
 
   class _InnerClass
     # https://github.com/jashkenas/coffee-script/issues/2961
@@ -43,5 +44,9 @@ exports.class = (dbcClassTemplate) ->
   for queryName of queries
     queryFn = queries[queryName]
     Cls::[queryName] = -> queryFn.apply @_innerInstance
+
+  for commandName of commands
+    commandFn = commands[commandName]().do
+    Cls::[commandName] = -> commandFn.apply @_innerInstance, arguments
 
   Cls
