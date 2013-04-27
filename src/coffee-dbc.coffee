@@ -64,13 +64,14 @@ dbc.class = (dbcClassTemplate) ->
       invariantContract.checkFor new: @
 
   for own queryName, queryFn of queries
-    Cls::[queryName] = ->
-      old_innerInstance = dbc.clone @_innerInstance
-      result = queryFn.apply @_innerInstance
-      for own key, value of old_innerInstance
-        if value != @_innerInstance[key]
-          throw new QueryMutationException queryName
-      result
+    do (queryName, queryFn) ->
+      Cls::[queryName] = ->
+        old_innerInstance = dbc.clone @_innerInstance
+        result = queryFn.apply @_innerInstance
+        for own key, value of old_innerInstance
+          if value != @_innerInstance[key]
+            throw new QueryMutationException queryName
+        result
 
   for own commandName, commandFn of commands
     fnArgNames = dbc.getFnArgNames commandFn
@@ -78,15 +79,16 @@ dbc.class = (dbcClassTemplate) ->
     commandRequireContract = new Contract "#{commandName}.require", command?.require
     commandDo = command?.do
     commandEnsureContract = new Contract "#{commandName}.ensure", command?.ensure
-    Cls::[commandName] = ->
-      args = {}
-      args[fnArgNames[i]] = arguments[i] for i in [0...arguments.length]
-      commandRequireContract.checkFor args
-      args.old = dbc.clone @
-      commandDo.apply @_innerInstance, arguments
-      args.new = @
-      commandEnsureContract.checkFor args, true
-      invariantContract.checkFor new: @
-      undefined
+    do (fnArgNames, commandRequireContract, commandDo, commandEnsureContract) ->
+      Cls::[commandName] = ->
+        args = {}
+        args[fnArgNames[i]] = arguments[i] for i in [0...arguments.length]
+        commandRequireContract.checkFor args
+        args.old = dbc.clone @
+        commandDo.apply @_innerInstance, arguments
+        args.new = @
+        commandEnsureContract.checkFor args, true
+        invariantContract.checkFor new: @
+        undefined
 
   Cls

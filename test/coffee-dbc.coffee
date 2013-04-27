@@ -163,7 +163,7 @@ describe 'Design By Contract', ->
 
   describe 'Time Of Day Example', ->
 
-    it 'should pass some tests', ->
+    it 'reduced example 1 should work', ->
       TimeOfDay = dbc.class ->
         constructor: ->
           @hour = 0
@@ -180,3 +180,85 @@ describe 'Design By Contract', ->
       coffeeTime = new TimeOfDay();
       (-> coffeeTime.setHour 23).should.not.throw Error
       (-> coffeeTime.setHour 24).should.throw dbc.ContractException
+
+    it 'reduced example 2 should work', ->
+      TimeOfDay = dbc.class ->
+
+        constructor: ->
+          @hour   = 5
+
+        queries:
+
+          hour:   -> @hour
+          minute: -> @minute
+
+        commands:
+
+          setHour: (h) ->
+            require:
+              validH: -> 0 <= @h <= 23
+            do: (h) -> @hour = h
+            ensure:
+              hourSet:         -> @new.hour()   == @h
+              minuteUnchanged: -> @new.minute() == @old.minute()
+
+          setMinute: (m) ->
+            require:
+              validM: -> 0 <= @m and @m <= 59
+            do: (m) -> @minute = m
+            ensure:
+              minuteSet:       -> @new.minute() == @m
+              hourUnchanged:   -> @new.hour()   == @old.hour()
+
+      coffeeTime = new TimeOfDay();
+      coffeeTime.hour().should.equal 5
+      (-> coffeeTime.setHour 23).should.not.throw Error
+      coffeeTime.hour().should.equal 23
+      (-> coffeeTime.setHour 24).should.throw dbc.ContractException
+
+    it 'full example should work', ->
+      TimeOfDay = dbc.class ->
+
+        constructor: ->
+          @hour   = 2
+          @minute = 3
+          @second = 4
+
+        queries:
+
+          hour:   -> @hour
+          minute: -> @minute
+          second: -> @second
+
+        commands:
+
+          setHour: (h) ->
+            require:
+              validH: -> 0 <= @h <= 23
+            do: (h) -> @hour = h
+            ensure:
+              hourSet:         -> @new.hour()   == @h
+              minuteUnchanged: -> @new.minute() == @old.minute()
+              secondUnchanged: -> @new.second() == @old.second()
+
+          setMinute: (m) ->
+            require:
+              validM: -> 0 <= @m and @m <= 59
+            do: (m) -> @minute = m
+            ensure:
+              minuteSet:       -> @new.minute() == @m
+              hourUnchanged:   -> @new.hour()   == @old.hour()
+              secondUnchanged: -> @new.second() == @old.second()
+
+          setSecond: (s) ->
+            do: (s) -> @second = s
+
+      coffeeTime = new TimeOfDay();
+      coffeeTime.hour().should.equal 2
+      (-> coffeeTime.setHour 23).should.not.throw Error
+      coffeeTime.hour().should.equal 23
+      (-> coffeeTime.setHour 24).should.throw dbc.ContractException
+      coffeeTime.minute().should.equal 3
+      (-> coffeeTime.setMinute 59).should.not.throw Error
+      coffeeTime.minute().should.equal 59
+      (-> coffeeTime.setHour 60).should.throw dbc.ContractException
