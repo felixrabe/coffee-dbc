@@ -251,14 +251,26 @@ describe 'Design By Contract', ->
               secondUnchanged: -> @new.second() == @old.second()
 
           setSecond: (s) ->
+            require:
+              validM: -> 0 <= @s and @s <= 59
             do: (s) -> @second = s
+            ensure:
+              secondSet:       -> @new.second() == @s
+              hourUnchanged:   -> @new.hour()   == @old.hour()
+              minuteUnchanged: -> @new.minute() == @old.minute()
 
       coffeeTime = new TimeOfDay();
       coffeeTime.hour().should.equal 2
       (-> coffeeTime.setHour 23).should.not.throw Error
       coffeeTime.hour().should.equal 23
       (-> coffeeTime.setHour 24).should.throw dbc.ContractException
+
       coffeeTime.minute().should.equal 3
       (-> coffeeTime.setMinute 59).should.not.throw Error
       coffeeTime.minute().should.equal 59
-      (-> coffeeTime.setHour 60).should.throw dbc.ContractException
+      (-> coffeeTime.setMinute 60).should.throw dbc.ContractException
+
+      coffeeTime.second().should.equal 4
+      (-> coffeeTime.setSecond 59).should.not.throw Error
+      coffeeTime.second().should.equal 59
+      (-> coffeeTime.setSecond 60).should.throw dbc.ContractException
