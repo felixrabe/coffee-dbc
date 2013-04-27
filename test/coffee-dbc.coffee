@@ -159,3 +159,24 @@ describe 'Design By Contract', ->
       (dbc.getFnArgNames (alabama) ->).should.deep.equal ['alabama']
       (dbc.getFnArgNames (a, b, c = 5) ->).should.deep.equal ['a', 'b', 'c']
       should.not.exist dbc.getFnArgNames (a, b, c...) ->  # CoffeeScript uses arguments here
+
+
+  describe 'Time Of Day Example', ->
+
+    it 'should pass some tests', ->
+      TimeOfDay = dbc.class ->
+        constructor: ->
+          @hour = 0
+
+        queries:
+          hour: -> @hour
+
+        commands:
+          setHour: (h) ->
+            require: validH: -> 0 <= @h <= 23
+            do: (h) -> @hour = h
+            ensure: hourSet: -> @new.hour() == @h
+
+      coffeeTime = new TimeOfDay();
+      (-> coffeeTime.setHour 23).should.not.throw Error
+      (-> coffeeTime.setHour 24).should.throw dbc.ContractException
