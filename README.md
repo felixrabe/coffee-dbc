@@ -10,7 +10,7 @@ Eiffel-style Design By Contract library for CoffeeScript (and Javascript).
 Usage examples
 --------------
 
-See example.coffee.
+See [example.coffee](example.coffee).
 
 
 Installation
