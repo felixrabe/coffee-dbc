@@ -1,10 +1,28 @@
 {
-  "dependencies": {
+  "name": "mcrio-coffee-dbc",
+  "version": "0.0.1",
+  "description": "Eiffel-style Design By Contract library for CoffeeScript (and Javascript)",
+  "license": "MIT",
+  "keywords": ["dbc", "contract"],
+
+  "author": "Felix Rabe",
+  "homepage": "http://mcr.io/coffee-dbc",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mcrio/coffee-dbc.git"
+  },
+
+  "main": "lib/coffee-dbc.js",
+
+  "devDependencies": {
     "chai": "*",
     "coffee-script": "*",
+    "mkdirp": "*",
     "mocha": "*"
   },
+
   "scripts": {
+    "prepublish": "cake build",
     "test": "cake test"
   }
 }
