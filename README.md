@@ -1,6 +1,8 @@
 mcrio-coffee-dbc
 ================
 
+[![Build Status](https://travis-ci.org/mcrio/coffee-dbc.png)](https://travis-ci.org/mcrio/coffee-dbc)
+
 Eiffel-style Design By Contract library for CoffeeScript (and Javascript).
 
 
