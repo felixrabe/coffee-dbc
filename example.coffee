@@ -5,7 +5,7 @@
 # See also: (Google: "design by contract example class time_of_day")
 #   http://docs.eiffel.com/book/platform-specifics/design-contract-and-assertions
 
-dbc = require './src/coffee-dbc'
+dbc = require 'mcrio-coffee-dbc'
 
 TimeOfDay = dbc.class ->
 
